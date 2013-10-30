@@ -408,6 +408,9 @@
 
                 // convert to dom
                 x = $(x);
+            } else if (x && Alpaca.isObject(x) && x.hasOwnProperty("template")) {
+                x = Alpaca.trim(x.template);
+                x = $(x);
             }
 
             return x;
@@ -1350,7 +1353,7 @@
                     else
                     {
                         // something is already in the target that isn't an OBJECT
-                        // skip
+                        return source;
                     }
 
                 }
@@ -1838,6 +1841,12 @@
             {
                 var viewId = view.id;
 
+                var type = null;
+                if (Alpaca.isObject(template)) {
+                    type = template.type;
+                    template = template.template;
+                }
+
                 var mightBeUrl = (template && template.indexOf("/") > -1);
                 if (mightBeUrl)
                 {
@@ -1853,12 +1862,6 @@
                         type = $(x).attr("type");
                         template = $(x).html();
                     }
-                }
-
-                var type = null;
-                if (Alpaca.isObject(template)) {
-                    type = template.type;
-                    template = template.template;
                 }
 
                 // if type isn't resolved, assume jquery tmpl()

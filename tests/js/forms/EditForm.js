@@ -45,4 +45,29 @@
         });
     });
 
+    // Test case : Custom render template
+    test("Custom template for wrapping fields.", function() {
+        stop();
+        $("#editform-2").alpaca({
+            "dataSource": "../examples/forms/customer-profile/data.json",
+            "optionsSource": "../examples/forms/customer-profile/simple-options.json",
+            "schemaSource": "../examples/forms/customer-profile/schema.json",
+            "view": {
+                "parent": "VIEW_WEB_EDIT",
+                "templates": {
+                    "controlFieldOuterEl": {
+                        type: 'text/x-jquery-tmpl',
+                        template: '<span><label class="qunit-test-label">${options.id}</label>{{html this.html}}</span>'
+                    }
+                }
+            },
+            "postRender": function (renderedField) {
+                expect(1);
+                var customLabels = $('#editform-2 span label.qunit-test-label');
+                ok(customLabels.length, 'Custom field labels are shown.');
+                start();
+            }
+        });
+    });
+
 }(jQuery) );
