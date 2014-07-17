@@ -25,7 +25,8 @@ $(function() {
 
         var readCode = function(id)
         {
-            var code = $.trim($('#' + id + '-script').html());
+            var code = $('#' + id + '-script').text();
+            code = $.trim(code);
 
             // do some code cleanup
             code = js_beautify(code, {
@@ -303,6 +304,11 @@ $(function() {
                 "id":"country-field",
                 "title":"Country Field",
                 "link":"../../components/fields/country-field.html"
+            },
+            {
+                "id":"currency-field",
+                "title":"Currency Field",
+                "link":"../../components/fields/currency-field.html"
             },
             {
                 "id":"date-field",

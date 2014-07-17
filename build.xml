@@ -132,6 +132,7 @@
         <file name="views/i18n/es_ES.js"/>
         <file name="views/i18n/fr_FR.js"/>
         <file name="views/i18n/zh_CN.js"/>
+        <file name="views/i18n/pl_PL.js"/>
 
     </filelist>
 
@@ -141,7 +142,7 @@
         <concat destfile="${package.dir}/js/${appkey}-core.js">
             <filelist dir="${prep.dir}">
                 <file name="license.txt"/>
-            </filelist>	
+            </filelist>
             <filelist dir="${prep.dir}/lib">
                 <file name="base.js"/>
                 <file name="json2.js"/>
@@ -202,6 +203,7 @@
                 <file name="views/i18n/es_ES.js"/>
                 <file name="views/i18n/fr_FR.js"/>
                 <file name="views/i18n/zh_CN.js"/>
+                <file name="views/i18n/pl_PL.js"/>
 
             </filelist>
         </concat>
@@ -210,9 +212,10 @@
         <concat destfile="${package.dir}/js/${appkey}-extras.js">
             <filelist dir="${prep.dir}">
                 <file name="license.txt"/>
-            </filelist>		
+            </filelist>
             <filelist dir="${prep.dir}/js">
                 <file name="fields/advanced/AddressField.js"/>
+                <file name="fields/advanced/CurrencyField.js" />
                 <file name="fields/advanced/DateField.js"/>
                 <file name="fields/advanced/DatetimeField.js"/>
                 <file name="fields/advanced/EditorField.js"/>
@@ -235,6 +238,8 @@
                 <file name="fields/advanced/CountryField.js"/>
                 <file name="fields/advanced/ZipcodeField.js"/>
                 <file name="fields/advanced/URLField.js"/>
+
+                <file name="fields/advanced/UploadField.js"/>
             </filelist>
         </concat>
 
@@ -252,6 +257,9 @@
                 <file name="license.txt"/>
             </filelist>
             <filelist dir="${prep.dir}/tests/js">
+
+                <file name="helpers/helpers.js"/>
+
                 <file name="fields/TextField.js"/>
                 <file name="fields/CheckBoxField.js"/>
                 <file name="fields/NumberField.js"/>
@@ -307,6 +315,7 @@
                 <include name="requirejs/**/*"/>
                 <include name="ace/**/*"/>
                 <include name="typeahead/**/*"/>
+                <include name="jquery-file-upload/**/*"/>
             </fileset>
             <fileset dir="${prep.dir}/lib/jquery-1.9.1">
                 <include name="jquery-1.9.1.min.js"/>
@@ -326,7 +335,7 @@
         <concat destfile="${prep.dir}/js/${appkey}-component-core.js">
             <filelist dir="${prep.dir}">
                 <file name="license.txt"/>
-            </filelist>		
+            </filelist>
             <filelist dir="${prep.dir}/lib">
                 <file name="base.js"/>
                 <file name="json2.js"/>
@@ -387,6 +396,7 @@
                 <file name="views/i18n/es_ES.js"/>
                 <file name="views/i18n/fr_FR.js"/>
                 <file name="views/i18n/zh_CN.js"/>
+                <file name="views/i18n/pl_PL.js"/>
 
             </filelist>
         </concat>
@@ -398,6 +408,7 @@
             </filelist>
             <filelist dir="${prep.dir}/js">
                 <file name="fields/advanced/AddressField.js"/>
+                <file name="fields/advanced/CurrencyField.js" />
                 <file name="fields/advanced/DateField.js"/>
                 <file name="fields/advanced/DatetimeField.js"/>
                 <file name="fields/advanced/EditorField.js"/>
@@ -420,6 +431,8 @@
                 <file name="fields/advanced/CountryField.js"/>
                 <file name="fields/advanced/ZipcodeField.js"/>
                 <file name="fields/advanced/URLField.js"/>
+
+                <file name="fields/advanced/UploadField.js"/>
             </filelist>
         </concat>
 
@@ -490,6 +503,7 @@
 
     <target name="compress" description="Compress the javascript and css" depends="concat-js,concat-css">
         <echo>Compressing Javascript...</echo>
+        <echo>${yui-compressor}</echo>
         <apply executable="java" parallel="false" dest="${build.dir}/package">
             <fileset dir="${build.dir}/package">
                 <include name="**/*.js"/>
@@ -499,6 +513,12 @@
             </fileset>
             <arg line="-jar"/>
             <arg path="${yui-compressor}"/>
+            <!--
+            <arg line="-v"/>
+            -->
+            <arg line="--nomunge"/>
+            <arg line="--preserve-semi"/>
+            <arg line="--disable-optimizations"/>
             <arg line="-o"/>
             <targetfile/>
             <srcfile/>
@@ -550,10 +570,12 @@
                        replace='jquery.wysiwyg.min.css' flags="gs">
             <fileset dir="${prep.dir}" includes="examples/**/wysiwyg*.html"/>
         </replaceregexp>
+        <!--
         <replaceregexp match="jquery-ui-timepicker-addon.js"
                        replace='jquery-ui-timepicker-addon.min.js' flags="gs">
             <fileset dir="${prep.dir}" includes="examples/**/datetime*.html"/>
         </replaceregexp>
+        -->
         <replaceregexp match="&lt;!--Alpaca JavaScript--&gt;(.*?)&lt;!--End of Alpaca JavaScript--&gt;"
                        replace='&lt;script type="text\/javascript" src="js/${appkey}.min.js"&gt;&lt;/script&gt;' flags="gs">
             <fileset dir="${prep.dir}" includes="index.html"/>
@@ -622,22 +644,22 @@
 
     </target>
 
-	<!-- Packages up the Web Components -->
+    <!-- Packages up the Web Components -->
     <target name="components">
-		<mkdir dir="${package.dir}/components"/>
-		
-		<!-- Alpaca Core ("alpaca-core") -->
-		<mkdir dir="${package.dir}/components/${appkey}-core"/>
-		<copy todir="${package.dir}/components/${appkey}-core">
+        <mkdir dir="${package.dir}/components"/>
+
+        <!-- Alpaca Core ("alpaca-core") -->
+        <mkdir dir="${package.dir}/components/${appkey}-core"/>
+        <copy todir="${package.dir}/components/${appkey}-core">
             <fileset dir="${package.dir}/css">
-				<include name="${appkey}-core.css" />
+                <include name="${appkey}-core.css" />
                 <include name="${appkey}-mobile.css" />
                 <include name="${appkey}-bootstrap.css" />
                 <include name="${appkey}-jqueryui.css" />
                 <include name="${appkey}-custom-fields.css" />
-				<include name="images/**" />
-			</fileset>
-		</copy>
+                <include name="images/**" />
+            </fileset>
+        </copy>
         <copy file="${project.dir}/components/alpaca-core/component.json.txt" tofile="${package.dir}/components/alpaca-core/component.json" overwrite="true" filtering="true">
             <filterchain>
                 <tokenfilter>
@@ -655,17 +677,17 @@
         </antcall>
 
         <!-- Alpaca Extras ("alpaca-extras") -->
-		<mkdir dir="${package.dir}/components/alpaca-extras"/>
+        <mkdir dir="${package.dir}/components/alpaca-extras"/>
         <copy todir="${package.dir}/components/alpaca-extras">
             <fileset dir="${package.dir}/css">
-				<include name="${appkey}-extras.css" />
+                <include name="${appkey}-extras.css" />
                 <include name="${appkey}-mobile.css" />
                 <include name="${appkey}-bootstrap.css" />
                 <include name="${appkey}-jqueryui.css" />
                 <include name="${appkey}-custom-fields.css" />
                 <include name="images/**" />
-			</fileset>
-		</copy>
+            </fileset>
+        </copy>
         <copy file="${project.dir}/components/alpaca-extras/component.json.txt" tofile="${package.dir}/components/alpaca-extras/component.json" overwrite="true" filtering="true">
             <filterchain>
                 <tokenfilter>
@@ -683,17 +705,17 @@
         </antcall>
 
         <!-- Alpaca ("alpaca") -->
-		<mkdir dir="${package.dir}/components/alpaca"/>
+        <mkdir dir="${package.dir}/components/alpaca"/>
         <copy todir="${package.dir}/components/alpaca">
-			<fileset dir="${package.dir}/css">
-				<include name="${appkey}.css" />
+            <fileset dir="${package.dir}/css">
+                <include name="${appkey}.css" />
                 <include name="${appkey}-mobile.css" />
                 <include name="${appkey}-bootstrap.css" />
                 <include name="${appkey}-jqueryui.css" />
                 <include name="${appkey}-custom-fields.css" />
                 <include name="images/**" />
-			</fileset>
-		</copy>
+            </fileset>
+        </copy>
         <copy file="${project.dir}/components/alpaca/component.json.txt" tofile="${package.dir}/components/alpaca/component.json" overwrite="true" filtering="true">
             <filterchain>
                 <tokenfilter>
@@ -739,9 +761,9 @@
             <fileset refid="alpaca-files"/>
         </copy>
         <copy todir="${local.docroot.basepath}/${appkey}">
-			<fileset dir="${project.dir}/build/package">
-		        <include name="components/**/*"/>
-			</fileset>
+            <fileset dir="${project.dir}/build/package">
+                <include name="components/**/*"/>
+            </fileset>
         </copy>
     </target>
 
@@ -750,9 +772,9 @@
             <fileset refid="alpaca-files"/>
         </copy>
         <copy todir="${local.docroot.basepath}/${appkey}">
-			<fileset dir="${project.dir}/build/package">
-		        <include name="components/**/*"/>
-			</fileset>
+            <fileset dir="${project.dir}/build/package">
+                <include name="components/**/*"/>
+            </fileset>
         </copy>
         <copy todir="${local.docroot.basepath}/${appkey}">
             <fileset dir="${project.dir}/build/package">
@@ -895,6 +917,14 @@
 
         <!-- RequireJS -->
         <copy tofile="${location}/lib/require.js" file="${package.dir}/lib/requirejs/require.js"/>
+
+        <!-- JQuery File Upload -->
+        <copy todir="${location}/lib/jquery-file-upload">
+            <fileset dir="${package.dir}/lib/jquery-file-upload">
+                <exclude name="**/.DS_Store/*"/>
+                <exclude name="**/.idea/*"/>
+            </fileset>
+        </copy>
 
     </target>
 

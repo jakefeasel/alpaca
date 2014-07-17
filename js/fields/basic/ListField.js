@@ -91,7 +91,36 @@
             var _this = this;
             if (this.options.dataSource) {
                 if (Alpaca.isFunction(this.options.dataSource)) {
-                    this.options.dataSource(this, function() {
+                    this.options.dataSource(this, function(values) {
+
+                        if (Alpaca.isArray(values))
+                        {
+                            for (var i = 0; i < values.length; i++)
+                            {
+                                if (typeof(values[i]) == "string")
+                                {
+                                    _this.selectOptions.push({
+                                        "text": values[i],
+                                        "value": values[i]
+                                    });
+                                }
+                                else if (Alpaca.isObject(values[i]))
+                                {
+                                    _this.selectOptions.push(values[i]);
+                                }
+                            }
+                        }
+                        else if (Alpaca.isObject(values))
+                        {
+                            for (var k in values)
+                            {
+                                _this.selectOptions.push({
+                                    "text": k,
+                                    "value": values[k]
+                                });
+                            }
+                        }
+
                         _this._renderField(onSuccess);
                     });
                 } else {
@@ -105,20 +134,29 @@
                                 if (_this.options.dsTransformer && Alpaca.isFunction(_this.options.dsTransformer)) {
                                     ds = _this.options.dsTransformer(ds);
                                 }
-                                if (ds) {
-                                    if (Alpaca.isArray(ds)) {
-                                        $.each(ds, function(index, value) {
+                                if (ds)
+                                {
+                                    if (Alpaca.isObject(ds))
+                                    {
+                                        // for objects, we walk through one key at a time
+                                        // the insertion order is the order of the keys from the map
+                                        // to preserve order, consider using an array as below
+                                        $.each(ds, function(key, value) {
                                             _this.selectOptions.push({
-                                                "value": value,
+                                                "value": key,
                                                 "text": value
                                             });
                                         });
                                     }
-                                    if (Alpaca.isObject(ds)) {
+                                    else if (Alpaca.isArray(ds))
+                                    {
+                                        // for arrays, we walk through one index at a time
+                                        // the insertion order is dictated by the order of the indices into the array
+                                        // this preserves order
                                         $.each(ds, function(index, value) {
                                             _this.selectOptions.push({
-                                                "value": index,
-                                                "text": value
+                                                "value": value.value,
+                                                "text": value.text
                                             });
                                         });
                                     }
@@ -200,8 +238,14 @@
                     },
                     "dataSource": {
                         "title": "Option Datasource",
-                        "description": "Datasource for generating list of options.",
+                        "description": "Datasource for generating list of options.  This can be a string or a function.  If a string, it is considered to be a URI to a service that produces a object containing key/value pairs or an array of elements of structure {'text': '', 'value': ''}.  This can also be a function that is called to produce the same list.",
                         "type": "string"
+                    },
+                    "removeDefaultNone": {
+                        "title": "Remove Default None",
+                        "description": "If true, the default 'None' option will not be shown.",
+                        "type": "boolean",
+                        "default": false
                     }
                 }
             });
@@ -220,6 +264,10 @@
                     },
                     "dataSource": {
                         "type": "text"
+                    },
+                    "removeDefaultNone": {
+                        "type": "checkbox",
+                        "rightLabel": "Remove Default None"
                     }
                 }
             });

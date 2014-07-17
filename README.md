@@ -11,7 +11,7 @@ Alpaca comes pre-configured to work nicely with the following web frameworks:
 - jQuery UI
 - jQuery Mobile
 - Barebones (empty CSS)
-     
+
 The Alpaca library is pre-packaged with controls, wizards, layouts, I18N support and pluggable template engines. We ship with support for jQuery Tmpl, EJS and Handlebars. Documentation and API information is provided so that you can extend Alpaca as you see fit.
 
 The philosophy behind Alpaca is that you should design your forms once and have them work on lots of different devices and UI engines without recoding. Here is a sample registration form written once and rendered using four different approaches:
@@ -98,8 +98,8 @@ If you're using AMD to include Alpaca, the AMD files are located in:
 
 ## Running the Unit Tests
 
-The unit tests are written using QUnit and are located in the `build/package/tests` directory.  
-You will need to run them using your web browser but in order to do that, you first need to mount 
+The unit tests are written using QUnit and are located in the `build/package/tests` directory.
+You will need to run them using your web browser but in order to do that, you first need to mount
 the `build/package` directory into your web server.  The Ant script provides a helper target to
 let you do this.
 
@@ -126,15 +126,22 @@ for your web server, you can run the QUnit tests by opening a web browser and po
 http://localhost/alpaca/tests/index.html
 ```
 
+## Connecting to Cloud CMS
+
+Alpaca works with any backend HTTP service.  There is a connector layer and you can plug in your own persistence for forms, schema, options and layout.
+
+Alpaca works out-of-the-box with [Cloud CMS](http://www.cloudcms.com).  Cloud CMS is a cost-effective backend content management system for mobile and web applications.  If you're looking for a quick way to capture and report on forms, please consider checking it out.
+
 ## Questions?
 
-If you have any questions, please feel free to submit and issue or ask on 
+If you have any questions, please feel free to submit and issue or ask on
 the [Alpaca Discussion Forums](http://www.cloudcms.org/forums/categories/alpaca).
 
 ## Authors
 
 + [@cloudcms](http://github.com/cloudcms)
 + [@uzquiano](http://github.com/uzquiano)
++ [@yaworsw](http://www.github.com/yaworsw)
 + [@drq](http://github.com/drq)
 
 
@@ -147,3 +154,6 @@ Thanks for assistance and contributions:
 + [@globocom](http://www.github.com/globocom)
 + [@urba](http://www.github.com/urba)
 + [@colegatron](http://www.github.com/colegatron)
++ [@Kirosoft](http://www.github.com/Kirosoft)
++ [@1337](http://www.github.com/1337)
+

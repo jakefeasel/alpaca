@@ -85,23 +85,113 @@
                 if (self.field)
                 {
                     // mask it
-                    if ( self.field && self.field.mask && self.options.maskString) {
+                    if ( self.field && self.field.mask && self.options.maskString)
+                    {
                         self.field.mask(self.options.maskString);
                     }
 
                     // typeahead?
-                    if ( self.field && self.field.typeahead && self.options.typeahead) {
-
-                        var tconfig = {};
-                        for (var k in self.options.typeahead) {
-                            tconfig[k] = self.options.typeahead[k];
+                    if ( self.field && self.field.typeahead && self.options.typeahead)
+                    {
+                        var tConfig = self.options.typeahead.config;
+                        if (!tConfig) {
+                            tConfig = {};
                         }
 
-                        if (!tconfig.name) {
-                            tconfig.name = self.getId();
+                        var tDatasets = self.options.typeahead.datasets;
+                        if (!tDatasets) {
+                            tDatasets = {};
                         }
 
-                        $(self.field).typeahead(tconfig);
+                        if (!tDatasets.name) {
+                            tDatasets.name = self.getId();
+                        }
+
+                        var tEvents = self.options.typeahead.events;
+                        if (!tEvents) {
+                            tEvents = {};
+                        }
+
+                        // support for each datasets (local, prefetch, remote)
+                        if (tDatasets.type == "local" || tDatasets.type == "remote" || tDatasets.type == "prefetch")
+                        {
+                            var bloodHoundConfig = {
+                                datumTokenizer: function(d) {
+                                    return Bloodhound.tokenizers.whitespace(d.value);
+                                },
+                                queryTokenizer: Bloodhound.tokenizers.whitespace
+                            };
+
+                            if (tDatasets.type == "local" )
+                            {
+                                var local = [];
+
+                                for (var i = 0; i < tDatasets.source.length; i++)
+                                {
+                                    var localElement = tDatasets.source[i];
+                                    if (typeof(localElement) == "string")
+                                    {
+                                        localElement = {
+                                            "value": localElement
+                                        };
+                                    }
+
+                                    local.push(localElement);
+                                }
+
+                                bloodHoundConfig.local = local;
+                            }
+
+                            if (tDatasets.type == "prefetch")
+                            {
+                                bloodHoundConfig.prefetch = {
+                                    url: tDatasets.source
+                                };
+
+                                if (tDatasets.filter)
+                                {
+                                    bloodHoundConfig.prefetch.filter = tDatasets.filter;
+                                }
+                            }
+
+                            if (tDatasets.type == "remote")
+                            {
+                                bloodHoundConfig.remote = {
+                                    url: tDatasets.source
+                                };
+
+                                if (tDatasets.filter)
+                                {
+                                    bloodHoundConfig.remote.filter = tDatasets.filter;
+                                }
+
+                                if (tDatasets.replace)
+                                {
+                                    bloodHoundConfig.remote.replace = tDatasets.replace;
+                                }
+                            }
+
+                            var engine = new Bloodhound(bloodHoundConfig);
+                            engine.initialize();
+                            tDatasets.source = engine.ttAdapter();
+                        }
+
+
+                        // compile templates
+                        if (tDatasets.templates)
+                        {
+                            for (var k in tDatasets.templates)
+                            {
+                                var template = tDatasets.templates[k];
+                                if (typeof(template) == "string")
+                                {
+                                    tDatasets.templates[k] = Handlebars.compile(template);
+                                }
+                            }
+                        }
+
+                        // process typeahead
+                        $(self.field).typeahead(tConfig, tDatasets);
 
                         // listen for "autocompleted" event and set the value of the field
                         $(self.field).on("typeahead:autocompleted", function(event, datum) {
@@ -114,28 +204,34 @@
                         });
 
                         // custom events
-                        if (tconfig.events)
+                        if (tEvents)
                         {
-                            if (tconfig.events.autocompleted) {
+                            if (tEvents.autocompleted) {
                                 $(self.field).on("typeahead:autocompleted", function(event, datum) {
-                                    tconfig.events.autocompleted(event, datum);
+                                    tEvents.autocompleted(event, datum);
                                 });
                             }
-                            if (tconfig.events.selected) {
+                            if (tEvents.selected) {
                                 $(self.field).on("typeahead:selected", function(event, datum) {
-                                    tconfig.events.selected(event, datum);
+                                    tEvents.selected(event, datum);
                                 });
                             }
                         }
 
                         // when the input value changes, change the query in typeahead
                         // this is to keep the typeahead control sync'd with the actual dom value
+                        // only do this if the query doesn't already match
                         var fi = $(self.field);
                         $(self.field).change(function() {
 
                             var value = $(this).val();
 
-                            $(fi).typeahead('setQuery', value);
+                            var newValue = $(fi).typeahead('val');
+                            if (newValue != value)
+                            {
+                                $(fi).typeahead('val', newValue);
+                            }
+
                         });
                     }
 
@@ -170,10 +266,25 @@
 
             if (this.field)
             {
-                if (Alpaca.isEmpty(value)) {
+                if (Alpaca.isEmpty(value))
+                {
                     this.field.val("");
-                } else {
+
+                    // if using typeahead, set using typeahead control
+                    if ( this.field && this.field.typeahead && this.options.typeahead)
+                    {
+                        $(this.field).typeahead('val', '');
+                    }
+                }
+                else
+                {
                     this.field.val(value);
+
+                    // if using typeahead, set using typeahead control
+                    if ( this.field && this.field.typeahead && this.options.typeahead)
+                    {
+                        $(this.field).typeahead('val', value);
+                    }
                 }
             }
 

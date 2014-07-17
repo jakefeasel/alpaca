@@ -113,7 +113,8 @@
                     "required": this.schema.required,
                     "selectOptions": this.selectOptions,
                     "name": this.name,
-                    "data": this.data
+                    "data": this.data,
+                    "removeDefaultNone": this.options.removeDefaultNone
                 });
 
                 // if emptySelectFirst and nothing currently checked, then pick first item in the value list
@@ -170,6 +171,9 @@
                 if (this.options.multiple) {
                     var isValid = true;
                     var _this = this;
+                    if (!val) {
+                        val = [];
+                    }
                     $.each(val, function(i,v) {
                         if ($.inArray(v, _this.schema["enum"]) <= -1) {
                             isValid = false;
@@ -196,7 +200,7 @@
             Alpaca.later(25, this, function() {
                 var v = _this.getValue();
                 _this.setValue(v);
-                _this.renderValidationState();
+                _this.refreshValidationState();
             });
         },
 
@@ -285,7 +289,7 @@
             return Alpaca.merge(this.base(), {
                 "fields": {
                     "multiple": {
-                        "rightLabel": "Allow mulitple selection ?",
+                        "rightLabel": "Allow multiple selection ?",
                         "helper": "Allow multiple selection if checked",
                         "type": "checkbox"
                     },
@@ -319,8 +323,8 @@
 
     });
 
-    Alpaca.registerTemplate("controlFieldSelect", '<select id="${id}" {{if options.readonly}}readonly="readonly"{{/if}} {{if options.multiple}}multiple{{/if}} {{if options.size}}size="${options.size}"{{/if}} {{if name}}name="${name}"{{/if}}>{{if !required}}<option value="">None</option>{{/if}}{{each(i,value) selectOptions}}<option value="${value}" {{if value == data}}selected="selected"{{/if}}>${text}</option>{{/each}}</select>');
-    Alpaca.registerTemplate("controlFieldSelectMultiple", '<select id="${id}" {{if options.readonly}}readonly="readonly"{{/if}} {{if options.multiple}}multiple="multiple"{{/if}} {{if options.size}}size="${options.size}"{{/if}} {{if name}}name="${name}"{{/if}}>{{if !required}}<option value="">None</option>{{/if}}{{each(i,value) selectOptions}}<option value="${value}" {{each(j,val) data}}{{if value == val}}selected="selected"{{/if}}{{/each}}>${text}</option>{{/each}}</select>');
+    Alpaca.registerTemplate("controlFieldSelect", '<select id="${id}" {{if options.readonly}}readonly="readonly"{{/if}} {{if options.multiple}}multiple{{/if}} {{if options.size}}size="${options.size}"{{/if}} {{if name}}name="${name}"{{/if}}>{{if !required && !removeDefaultNone}}<option value="">None</option>{{/if}}{{each(i,value) selectOptions}}<option value="${value}" {{if value == data}}selected="selected"{{/if}}>${text}</option>{{/each}}</select>');
+    Alpaca.registerTemplate("controlFieldSelectMultiple", '<select id="${id}" {{if options.readonly}}readonly="readonly"{{/if}} {{if options.multiple}}multiple="multiple"{{/if}} {{if options.size}}size="${options.size}"{{/if}} {{if name}}name="${name}"{{/if}}>{{if !required && !removeDefaultNone}}<option value="">None</option>{{/if}}{{each(i,value) selectOptions}}<option value="${value}" {{each(j,val) data}}{{if value == val}}selected="selected"{{/if}}{{/each}}>${text}</option>{{/each}}</select>');
     Alpaca.registerFieldClass("select", Alpaca.Fields.SelectField);
 
 })(jQuery);

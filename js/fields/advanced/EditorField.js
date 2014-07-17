@@ -111,6 +111,13 @@
                         {
                             var heightUpdateFunction = function() {
 
+                                var first = false;
+                                if (self.editor.renderer.lineHeight === 1)
+                                {
+                                    first = true;
+                                    self.editor.renderer.lineHeight = 16;
+                                }
+
                                 // http://stackoverflow.com/questions/11584061/
                                 var newHeight = self.editor.getSession().getScreenLength() * self.editor.renderer.lineHeight + self.editor.renderer.scrollBar.getWidth();
 
@@ -119,6 +126,13 @@
                                 // This call is required for the editor to fix all of
                                 // its inner structure for adapting to a change in size
                                 self.editor.resize();
+
+                                if (first)
+                                {
+                                    window.setTimeout(function() {
+                                        self.editor.clearSelection();
+                                    }, 5);
+                                }
                             };
 
                             // Set initial size to match initial content
@@ -184,13 +198,33 @@
 
                 var valInfo = this.validation;
 
-                var status =  this._validateWordCount();
+                var wordCountStatus =  this._validateWordCount();
                 valInfo["wordLimitExceeded"] = {
-                    "message": status ? "" : Alpaca.substituteTokens(this.view.getMessage("wordLimitExceeded"), [this.options.wordlimit]),
-                    "status": status
+                    "message": wordCountStatus ? "" : Alpaca.substituteTokens(this.view.getMessage("wordLimitExceeded"), [this.options.wordlimit]),
+                    "status": wordCountStatus
                 };
 
-                return baseStatus && valInfo["wordLimitExceeded"]["status"];
+                var editorAnnotationsStatus = this._validateEditorAnnotations();
+                valInfo["editorAnnotationsExist"] = {
+                    "message": editorAnnotationsStatus ? "" : this.view.getMessage("editorAnnotationsExist"),
+                    "status": editorAnnotationsStatus
+                };
+
+                return baseStatus && valInfo["wordLimitExceeded"]["status"] && valInfo["editorAnnotationsExist"]["status"];
+            },
+
+            _validateEditorAnnotations: function() {
+
+                if (this.editor)
+                {
+                    var annotations = this.editor.getSession().getAnnotations();
+                    if (annotations && annotations.length > 0)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
             },
 
             /**
@@ -351,7 +385,8 @@
         });
 
     Alpaca.registerMessages({
-        "wordLimitExceeded": "The maximum word limit of {0} has been exceeded."
+        "wordLimitExceeded": "The maximum word limit of {0} has been exceeded.",
+        "editorAnnotationsExist": "The editor has errors in it that must be corrected"
     });
 
     Alpaca.registerTemplate("controlFieldEditor", '<div id="${id}" class="control-field-editor-el"></div>');
